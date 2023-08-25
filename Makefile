@@ -30,6 +30,8 @@ TEMPLATE_DIR ?= templates
 SETTINGS_DIR ?= extras
 BIB_DIR ?= extras
 CSL_DIR ?= extras
+CSS_DIR ?= extras/css
+JS_DIR ?= extras/js
 EXT ?= .md
 FILE_NAME ?= thesis
 
@@ -45,6 +47,8 @@ APPENDICES := $(shell find $(BACKMATTER_DIR) -type f -iname '*appendix*$(EXT)'| 
 TEMPLATES := $(shell find $(TEMPLATE_DIR) -type f -name '*')
 BIBLIOGRAPHY := $(shell find $(BIB_DIR) -maxdepth 1 -type f -iname '*.bib')
 CSL := $(shell find $(CSL_DIR) -maxdepth 1 -type f -iname '*.csl')
+CSS := $(shell find $(CSS_DIR) -type f -iname '*.css')
+JS := $(shell find $(JS_DIR) -type f -name '*')
 
 # Detect appropriate run-time options
 ifneq ('$(BIBLIOGRAPHY)','')
@@ -84,6 +88,7 @@ endif
 THESIS_TARGET := _build/pandoc/$(FILE_NAME).pdf
 THESIS_ABSTRACT := _build/pandoc/$(FILE_NAME)_abstract.pdf
 PDF_TARGETS := $(patsubst $(SOURCE_DIR)/%$(EXT),_build/pdf/%.pdf,$(CHAPTERS))
+HTML_TARGETS := $(patsubst $(SOURCE_DIR)/%$(EXT),_build/html/%.html,$(CHAPTERS))
 
 # Settings
 USER_OPTIONS = $(foreach file, $(SETTINGS),--metadata-file=$(file))
@@ -92,6 +97,12 @@ REQUIRED_OPTIONS = --metadata-file=templates/settings_required.yaml
 COMMON_OPTIONS = $(GENERAL_OPTIONS) $(SETTINGS_EXTRAS) $(REQUIRED_OPTIONS)
 PANDOC_OPTIONS = $(COMMON_OPTIONS) --resource-path=$(GRAPHICS_DIR) --citeproc
 PDF_OPTIONS = $(PANDOC_OPTIONS) --pdf-engine=xelatex --template=templates/pandoc.tex
+HTML_OPTIONS = $(PANDOC_OPTIONS) \
+				--standalone \
+				--embed-resources \
+				--mathjax \
+				$(foreach style, $(CSS),--css=$(style)) \
+				$(foreach injection, $(JS),-H $(injection))
 SIMPLIFY = --metadata=toc:false --metadata=lot:false --metadata=lof:false \
 				--metadata=title:"" --metadata=subtitle:"" --metadata=author:"" --metadata=date:"" \
 				--metadata=numbersections:false --quiet
@@ -108,12 +119,13 @@ THESIS_REQUIRES = $(PANDOC_REQUIRES) \
 				$(TEMPLATE_DIR)/sfchap.sty \
 				$(TEMPLATE_DIR)/sfsection.sty
 
-all: clean thesis pdf
+all: clean thesis pdf html
 
 # TARGETS get expanded to a list of files; any file that doesn't yet
 # exist in this list gets built according to the recipe for the target
 thesis: $(THESIS_TARGET) $(THESIS_ABSTRACT)
 pdf: $(PDF_TARGETS) 
+html: $(HTML_TARGETS)
 
 clean:
 	rm -rf _build
@@ -123,7 +135,7 @@ purge:
 
 # Make the above recipes behave like commands in case any files happen
 # to share the name of the coresponding make target
-.PHONY: all thesis pdf clean purge
+.PHONY: all thesis pdf html doc clean purge
 
 # Recipes for complete targets via pandoc
 
@@ -143,6 +155,11 @@ _build/pdf/%.pdf: $(SOURCE_DIR)/%$(EXT) $(PANDOC_REQUIRES) templates/pandoc.tex
 	@mkdir -p $(@D)
 	@echo "Building $@ from $<"
 	@$(PANDOC) -o $@ $(PDF_OPTIONS) $(SIMPLIFY) $<
+
+_build/html/%.html: $(SOURCE_DIR)/%$(EXT) $(CSS) $(JS) $(PANDOC_REQUIRES)
+	@mkdir -p $(@D)
+	@echo "Building $@ from $<"
+	@$(PANDOC) -o $@ $(HTML_OPTIONS) $(SIMPLIFY) $<
 
 # Recipes to build required dependencies
 

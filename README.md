@@ -293,6 +293,12 @@ Make a PDF of each chapter:
 make pdf
 ```
 
+Make a responsive HTML page of each chapter:
+
+```bash
+make html
+```
+
 ## File maintenance
 
 Generate a thesis, abstract, and a review document of each chapter in all
@@ -316,4 +322,3 @@ Remove all target build files and intermediate files:
 ```bash
 make purge
 ```
-

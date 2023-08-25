@@ -1,0 +1,193 @@
+/* ###################################
+   LIGHT COLORS (DEFAULT)
+   ##################################*/
+
+
+body {
+  color: #444;
+  background: #fefefe;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #2a76dd;
+}
+
+a {
+  color: #0645ad;
+}
+
+a:visited {
+  color: #0b0080;
+}
+
+a:hover {
+  color: #06e;
+}
+
+a:active {
+  color: #faa700;
+}
+
+*::-moz-selection {
+  background: rgba(255, 255, 0, 0.3);
+  color: #000;
+}
+
+*::selection {
+  background: rgba(255, 255, 0, 0.3);
+  color: #000;
+}
+
+a::-moz-selection {
+  background: rgba(255, 255, 0, 0.3);
+  color: #0645ad;
+}
+
+a::selection {
+  background: rgba(255, 255, 0, 0.3);
+  color: #0645ad;
+}
+
+ins {
+  background: #9f6;
+  color: #000;
+}
+
+del {
+    background-color: #fbb;
+    color: #555;
+}
+
+mark {
+  background: #ff0;
+  color: #000;
+}
+
+blockquote {
+  color: #666666;
+  background: rgba(200,200,200,0.1);
+  border-left: 0.5em #EEE solid;
+}
+
+hr {
+  border-top: 1px solid #aaa;
+  border-bottom: 1px solid #eee;
+}
+
+pre, code, kbd, samp {
+  color: #000;
+}
+
+pre {
+  background: #fdf9e7;
+}
+
+kbd {
+  border: 1px solid black;
+}
+
+dt {
+  background-color: rgba(42, 117, 221, 0.1);
+}
+
+table {
+  border-bottom: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+  background-color: #eee;
+}
+
+th {
+  background-color: #ddd;
+  border-top: 1px solid #ddd;
+  border-left: 1px solid #ddd;
+}
+
+td {
+  border-top: 1px solid #ddd;
+  border-left: 1px solid #ddd;
+}
+
+
+/* ###################################
+   DARK MODE OVERRIDES
+   ##################################*/
+
+@media (prefers-color-scheme: dark){
+    body{
+      background-color: #404040;
+      color: #fefef0;
+    }
+
+    h1, h2, h3, h4, h5,h6 {
+      color: #42affa;
+    }
+
+    blockquote {
+      color: #edede0;
+      border-left: 0.5em #666 solid;
+    }
+
+    ins {
+      background: #390;
+      color: #fefef0;
+    }
+
+    del {
+      background-color: #f65;
+    }
+    mark {
+      background: #660;
+      color: #fefef0;
+    }
+
+    pre, code, kbd, samp {
+      color: #fefef0;
+    }
+
+    pre {
+      background: #333;
+    }
+
+    kbd {
+      border: 1px solid #fefef0;
+    }
+
+    dt {
+      background-color: rgba(66, 176, 250, 0.1);
+    }
+
+    a {
+      color: #42affa;
+    }
+
+    a:hover {
+      color: #8dcffc;
+    }
+
+    a:visited {
+      color: #1fa2f9;
+    }
+
+    span:after {
+      color: #fff;
+      background: #068de9;
+    }
+
+    table {
+      border-bottom: 1px solid #777;
+      border-right: 1px solid #777;
+      background-color: #666;
+    }
+
+    th {
+      background-color: #555;
+      border-top: 1px solid #777;
+      border-left: 1px solid #777;
+    }
+
+    td {
+      border-top: 1px solid #777;
+      border-left: 1px solid #777;
+    }
+}
+
