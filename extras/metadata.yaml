@@ -1,0 +1,20 @@
+title: "A title"
+subtitle: "An optional subtitle"
+author: First Last
+institution: Some University
+degree: Doctor of Philosopy
+major: Major
+date: Month Day, Year
+location: City, State
+chair:
+    name: First Last
+    title: Title
+committee:
+  - name: First Last
+    title: Title
+  - name: First Last
+    title: Title
+  - name: First Last
+    title: Title
+  - name: First Last
+    title: Title
