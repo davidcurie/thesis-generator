@@ -83,6 +83,7 @@ endif
 # Files we can build on demand
 THESIS_TARGET := _build/pandoc/$(FILE_NAME).pdf
 THESIS_ABSTRACT := _build/pandoc/$(FILE_NAME)_abstract.pdf
+PDF_TARGETS := $(patsubst $(SOURCE_DIR)/%$(EXT),_build/pdf/%.pdf,$(CHAPTERS))
 
 # Settings
 USER_OPTIONS = $(foreach file, $(SETTINGS),--metadata-file=$(file))
@@ -91,6 +92,9 @@ REQUIRED_OPTIONS = --metadata-file=templates/settings_required.yaml
 COMMON_OPTIONS = $(GENERAL_OPTIONS) $(SETTINGS_EXTRAS) $(REQUIRED_OPTIONS)
 PANDOC_OPTIONS = $(COMMON_OPTIONS) --resource-path=$(GRAPHICS_DIR) --citeproc
 PDF_OPTIONS = $(PANDOC_OPTIONS) --pdf-engine=xelatex --template=templates/pandoc.tex
+SIMPLIFY = --metadata=toc:false --metadata=lot:false --metadata=lof:false \
+				--metadata=title:"" --metadata=subtitle:"" --metadata=author:"" --metadata=date:"" \
+				--metadata=numbersections:false --quiet
 ABSTRACT_OPTIONS = $(GENERAL_OPTIONS) --template=templates/abstract.tex
 THESIS_OPTIONS = $(foreach file, $(BEFORE),-B $(file)) \
 				$(foreach file, $(AFTER),-A $(file)) \
@@ -104,11 +108,12 @@ THESIS_REQUIRES = $(PANDOC_REQUIRES) \
 				$(TEMPLATE_DIR)/sfchap.sty \
 				$(TEMPLATE_DIR)/sfsection.sty
 
-all: clean thesis
+all: clean thesis pdf
 
 # TARGETS get expanded to a list of files; any file that doesn't yet
 # exist in this list gets built according to the recipe for the target
 thesis: $(THESIS_TARGET) $(THESIS_ABSTRACT)
+pdf: $(PDF_TARGETS) 
 
 clean:
 	rm -rf _build
@@ -118,7 +123,7 @@ purge:
 
 # Make the above recipes behave like commands in case any files happen
 # to share the name of the coresponding make target
-.PHONY: all thesis clean purge
+.PHONY: all thesis pdf clean purge
 
 # Recipes for complete targets via pandoc
 
@@ -131,6 +136,13 @@ $(THESIS_ABSTRACT): $(ABSTRACT) $(PANDOC_REQUIRES) templates/abstract.tex
 	@mkdir -p $(@D)
 	@echo "Building $@ from $<"
 	@$(PANDOC) -o $@ $(ABSTRACT_OPTIONS) $<
+
+# Recipes to build single files
+
+_build/pdf/%.pdf: $(SOURCE_DIR)/%$(EXT) $(PANDOC_REQUIRES) templates/pandoc.tex
+	@mkdir -p $(@D)
+	@echo "Building $@ from $<"
+	@$(PANDOC) -o $@ $(PDF_OPTIONS) $(SIMPLIFY) $<
 
 # Recipes to build required dependencies
 
