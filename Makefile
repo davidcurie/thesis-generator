@@ -88,6 +88,7 @@ endif
 THESIS_TARGET := _build/pandoc/$(FILE_NAME).pdf
 THESIS_ABSTRACT := _build/pandoc/$(FILE_NAME)_abstract.pdf
 PDF_TARGETS := $(patsubst $(SOURCE_DIR)/%$(EXT),_build/pdf/%.pdf,$(CHAPTERS))
+DRAFT_TARGETS := $(patsubst $(SOURCE_DIR)/%$(EXT),_build/draft/%.pdf,$(CHAPTERS))
 HTML_TARGETS := $(patsubst $(SOURCE_DIR)/%$(EXT),_build/html/%.html,$(CHAPTERS))
 DOC_TARGETS := $(patsubst $(SOURCE_DIR)/%$(EXT),_build/doc/%.docx,$(CHAPTERS))
 
@@ -108,6 +109,7 @@ DOC_OPTIONS = $(PANDOC_OPTIONS)
 SIMPLIFY = --metadata=toc:false --metadata=lot:false --metadata=lof:false \
 				--metadata=title:"" --metadata=subtitle:"" --metadata=author:"" --metadata=date:"" \
 				--metadata=numbersections:false --quiet
+DRAFT = $(SIMPLIFY) -H templates/draft.sty
 ABSTRACT_OPTIONS = $(GENERAL_OPTIONS) --template=templates/abstract.tex
 THESIS_OPTIONS = $(foreach file, $(BEFORE),-B $(file)) \
 				$(foreach file, $(AFTER),-A $(file)) \
@@ -129,6 +131,7 @@ thesis: $(THESIS_TARGET) $(THESIS_ABSTRACT)
 pdf: $(PDF_TARGETS) 
 html: $(HTML_TARGETS)
 doc: $(DOC_TARGETS)
+draft: $(DRAFT_TARGETS) 
 
 clean:
 	rm -rf _build
@@ -138,7 +141,7 @@ purge:
 
 # Make the above recipes behave like commands in case any files happen
 # to share the name of the coresponding make target
-.PHONY: all thesis pdf html doc clean purge
+.PHONY: all thesis pdf draft html doc clean purge
 
 # Recipes for complete targets via pandoc
 
@@ -158,6 +161,11 @@ _build/pdf/%.pdf: $(SOURCE_DIR)/%$(EXT) $(PANDOC_REQUIRES) templates/pandoc.tex
 	@mkdir -p $(@D)
 	@echo "Building $@ from $<"
 	@$(PANDOC) -o $@ $(PDF_OPTIONS) $(SIMPLIFY) $<
+
+_build/draft/%.pdf: $(SOURCE_DIR)/%$(EXT) $(PANDOC_REQUIRES) templates/pandoc.tex templates/draft.sty
+	@mkdir -p $(@D)
+	@echo "Building $@ from $<"
+	@$(PANDOC) -o $@ $(PDF_OPTIONS) $(DRAFT) $<
 
 _build/html/%.html: $(SOURCE_DIR)/%$(EXT) $(CSS) $(JS) $(PANDOC_REQUIRES)
 	@mkdir -p $(@D)

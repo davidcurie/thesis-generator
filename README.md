@@ -293,6 +293,15 @@ Make a PDF of each chapter:
 make pdf
 ```
 
+Make a draft PDF of each chapter:
+
+```bash
+make draft
+```
+
+A draft is a PDF document with explicit line numbers displayed in the margins
+for easier referencing.
+
 Make a responsive HTML page of each chapter:
 
 ```bash
