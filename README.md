@@ -337,3 +337,185 @@ Remove all target build files and intermediate files:
 ```bash
 make purge
 ```
+
+## Advanced use
+
+If you prefer manual tweaks to your LaTeX source documents and can't figure out
+how to achieve it through Pandoc or the Makefile, you can trigger the
+generation of intermediate LaTeX files in the temporary directory.
+
+### Regenerate automatically detected dependencies
+
+> Note that these intermediate files may already be generated from `make`
+commands, but it may be helpful to manually trigger these builds if your
+expected `make <taget>` command has runtime errors.
+
+For any front matter or appendix file that is dynamically built, you can run
+the following to see the LaTeX source generated behind the scenes, assuming you
+have the appropriate prerequisite source file:
+
+```bash
+make _tmp/abstract.tex
+```
+
+Available targets: `_tmp/title.tex`, `_tmp/copyright.tex`,
+`_tmp/dedication.tex`, `_tmp/acknowledgments.tex`, `_tmp/appendix.tex` `_tmp/abstract.tex`
+
+Any edits you make to these raw files will trigger a rebuild of any target that
+depends on them the next time you run make on that target[^dependencies]. This means you can
+edit the abstract page if you don't like a setting automatically generated from
+the template, and then re-run `make abstract` to regenerate the abstract with
+your modified `_tmp/abstract.tex` source.
+
+[^dependencies]: Builds are triggered whenever a dependency is newer than
+    a target. The dependency hierarchy goes from source -> intermediate -> target.
+    If you ask for a target with `make target` after editing a source file, the
+    intermediate file will be updated before target is built. If a source file
+    remains untouched and an intermediate file is adjusted, the intermediate file
+    will not be regenerated, but the target will recognize the updated intermediate
+    file and trigger a rebuild.
+
+If you are making the same tweaks often, you can edit the appropriate template
+file to your liking, but beware that these changes may be destroyed if you
+re-sync your repository to this one on GitHub.
+
+### Edit a LaTeX version of a thesis
+
+Because the Pandoc process handles conversion and assembly of the source
+documents in one streamlined process during `make thesis`, there is no
+intermediate `main.tex` file that you can edit to control explicit thesis
+formatting.
+
+You can force the generation of the intermediate LaTeX document produced by
+Pandoc with the following command:
+
+```bash
+make latex
+```
+
+This option inserts all source documents in their converted LaTeX form into one
+document, `_tmp/pandoc.tex` according to the minimally modified default Pandoc
+LaTeX template in `templates/pandoc.tex`. The make process then runs `pdflatex`
+and `bibtex` in a defined sequence more akin to the _MikTex_ or _TexShop_
+programs on Windows or Mac. The result is a PDF file stored in the
+`_build/latex` directory, but the auxiliary files are explicitly preserved in
+`_tmp/`. From here, you can edit `_tmp/pandoc.tex` and re-run `make latex` to
+update the generated PDF.
+
+The net results of `make latex` and `make thesis` are not identical because
+many of the Pandoc run-time options expire upon generation of the
+intermediate `.tex` file, at which point the compilation responsibility is
+handed off to another program that is not Pandoc. The most crucial change is
+that in order to run `bibtex` on the intermediate `pandoc.tex` file, the `make
+latex` build process has to substitute the `--citeproc` filter for the
+`--natbib` filter. The undesired consequence of this is that Pandoc no longer
+handles the styling of the bibliography according to your supplied `.csl` file
+or metadata options.
+
+To fix this, you will likely need to edit the bibliography section in your
+intermediate `_tmp/pandoc.tex` file and adjust the style to your liking.
+
+> Be mindful that if you edit the source documents in `chapters/`, any metadata
+file in `extras/`, or any dependent front matter or appendix files in `_tmp/`,
+the `_tmp/pandoc.tex` file will be rebuilt. If you find yourself making
+frequent adjustments to `_tmp/pandoc.tex`, you can edit `templates/pandoc.tex`.
+Saving edits to this file will also trigger a rebuild of `_tmp/pandoc.tex` on
+the next invocation of `make latex`.
+
+In a similar fashion, you can generate an intermediate LaTeX thesis file more
+exactly aligned to the official Vanderbilt University Overleaf template
+published in 2021. This uses a heavily modified Pandoc template with all but
+a limited number of Pandoc options explicitly disabled. In particular, it fills
+in the `hyperref` PDF attributes from the `title:` and `author:` metadata,
+inserts any `header-includes:` statements in the preamble, and checks if any
+optional front matter or appendix files are present in the `extras/` directory
+and automatically inserts them into their appropriate location in the LaTeX
+file.
+
+```bash
+make overleaf
+```
+
+As before, this relies on `pdflatex` and `bibtex` under the hood, so the same
+problems outlined in `make latex` apply here. The intermediate files in `_tmp/`
+will have `overleaf` in their name, and the final PDF will be placed in
+`_build/overleaf/`. After editing `_tmp/overleaf.tex`, you can run `make
+overleaf` again to update the generated PDF.
+
+> Also as before, `_tmp/overleaf.tex` will be rebuilt on any changes to the
+source files in `chapters/` or any metadata file in `extras/`. If you find
+yourself making frequent adjustments to `_tmp/overleaf.tex`, you can edit
+`templates/overleaf.tex`. Saving edits to this file will also trigger a rebuild
+of `_tmp/overleaf.tex`. Be mindful that your changes to
+`templates/overleaf.tex` may be overwritten if you re-sync your repository.
+
+In addition to the bibliography differences that are described for the `make
+latex` process, the additional difference in output format between `make
+thesis` and `make overleaf` is that the Overleaf version uses the `article`
+document class, whereas the default Pandoc build uses the `book` document
+class. If you want to print a one-sided document like in the article
+class, you can supply the following option in any user-defined metadata files:
+
+```yaml
+classoption: oneside
+```
+
+#### Notes on vector images
+
+Both the `_tmp/overleaf.tex` and the `_tmp/pandoc.tex` intermediate files
+include the CTAN package `svg` to handle `.svg` graphics, but their format is
+first rendered to a `.pdf` and `.pdf_tex` through [Inkscape][inkscape]. For the
+`pdflatex` process to complete without errors, you need to have `inkscape`
+accessible from the _PATH_ of your terminal. Linux and MacOS users who install
+Inkscape will have this automatically configured, but Windows users may need to
+do more. See [this post][svg-package] for more background. The key difference
+in result between `make thesis` and either `make latex` or `make overleaf` is
+that available text fields from any `.svg` figure will be rendered by LaTeX
+instead of their fonts as specified in the source file.
+
+[inkscape]: https://inkscape.org
+[svg-package]: https://tex.stackexchange.com/a/523685
+
+#### Notes on explicit LaTeX builds
+
+Both the `_tmp/overleaf.tex` and `_tmp/pandoc.tex` file will be similar to what
+you would use directly on Overleaf or in a LaTeX software suite except that the
+paths of the input files and graphics path are specified as relative paths from
+the root directory of this project. In Overleaf, you might normally keep your
+`main.tex` file in the project root and specify figures and other input paths
+relative to the source document. In this project, the source document is placed
+in the intermediate directory. This means you cannot run `pdflatex` from the
+`_tmp/` directory and expect things to work as normal.
+
+If you want to migrate the results of this build process to your preferred
+LaTeX suite, the following checklist may be helpful:
+
+- [ ] Copy all contents of `_tmp/` to a new directory of your choice (e.g.
+  `MyThesis/`)
+- [ ] Copy all figures from this project to a directory of your choice (e.g.
+  `MyThesis/Figures/`)
+- [ ] Copy the bibliography and any style sheets to a directory of your choice
+  (e.g. `MyThesis/`)
+ - [ ] Update the graphics path in `overleaf.tex` to point to your figures
+   directory _relative to `overleaf.tex`_ (e.g. `\graphicspath{{Figures}}`)
+ - [ ] Adjust the input path in `overleaf.tex` for any additional files to be
+   referenced relative to `overleaf.tex` (e.g. adjust `\input(_tmp/title)` to
+   `\input(title)`)
+ - [ ] Ensure the name and location of the bibliography in `overleaf.tex` is
+   specified relative to `overleaf.tex`. (e.g. `\bibliography{MyBibliography}`)
+- [ ] Compile your LaTeX document from the directory as you normally would
+  (e.g. compile LaTeX -> run BibTeX -> compile LaTeX -> compile LaTeX)
+
+
+### Summary of make targets
+
+| Target     | Rebuilt on changes to    | Result in `_build/`                               | Engine   |
+|------------|--------------------------|---------------------------------------------------|----------|
+| `thesis`   | `chapters/*`, `extras/*` | `pandoc/thesis.pdf`, `pandoc/thesis_abstract.pdf` | pandoc   |
+| `pdf`      | `chapters/*`             | `pdf/*.pdf`,                                      | pandoc   |
+| `html`     | `chapters/*`             | `html/*.html`,                                    | pandoc   |
+| `doc`      | `chapters/*`             | `doc/*.docx`,                                     | pandoc   |
+| `draft`    | `chapters/*`             | `draft/*.pdf`,                                    | pandoc   |
+| `latex`    | `_tmp/pandoc.tex`,       | `latex/thesis.pdf`                                | pdflatex |
+| `abstract` | `_tmp/abstract.tex`      | `latex/thesis_abstract.pdf`                       | pdflatex |
+| `overleaf` | `_tmp/overleaf.tex`      | `overleaf/thesis.pdf`                             | pdflatex |
