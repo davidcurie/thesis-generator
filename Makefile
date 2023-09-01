@@ -89,6 +89,7 @@ THESIS_TARGET := _build/pandoc/$(FILE_NAME).pdf
 THESIS_ABSTRACT := _build/pandoc/$(FILE_NAME)_abstract.pdf
 LATEX_TARGET := _build/latex/$(FILE_NAME).pdf
 LATEX_ABSTRACT := _build/latex/$(FILE_NAME)_abstract.pdf
+OVERLEAF_TARGET := _build/overleaf/$(FILE_NAME).pdf
 PDF_TARGETS := $(patsubst $(SOURCE_DIR)/%$(EXT),_build/pdf/%.pdf,$(CHAPTERS))
 DRAFT_TARGETS := $(patsubst $(SOURCE_DIR)/%$(EXT),_build/draft/%.pdf,$(CHAPTERS))
 HTML_TARGETS := $(patsubst $(SOURCE_DIR)/%$(EXT),_build/html/%.html,$(CHAPTERS))
@@ -99,6 +100,7 @@ USER_OPTIONS = $(foreach file, $(SETTINGS),--metadata-file=$(file))
 GENERAL_OPTIONS = --metadata-file=templates/settings_default.yaml $(BIB_OPTIONS) $(USER_OPTIONS) 
 REQUIRED_OPTIONS = --metadata-file=templates/settings_required.yaml
 COMMON_OPTIONS = $(GENERAL_OPTIONS) $(SETTINGS_EXTRAS) $(REQUIRED_OPTIONS)
+OVERLEAF_OPTIONS = $(COMMON_OPTIONS) --template=templates/overleaf.tex --natbib
 PANDOC_OPTIONS = $(COMMON_OPTIONS) --resource-path=$(GRAPHICS_DIR) --citeproc
 PDF_OPTIONS = $(PANDOC_OPTIONS) --pdf-engine=xelatex --template=templates/pandoc.tex
 HTML_OPTIONS = $(PANDOC_OPTIONS) \
@@ -136,6 +138,7 @@ all: clean thesis pdf html doc
 thesis: $(THESIS_TARGET) $(THESIS_ABSTRACT)
 abstract: $(LATEX_ABSTRACT)
 latex: $(LATEX_TARGET)
+overleaf: $(OVERLEAF_TARGET)
 pdf: $(PDF_TARGETS) 
 html: $(HTML_TARGETS)
 doc: $(DOC_TARGETS)
@@ -149,7 +152,7 @@ purge:
 
 # Make the above recipes behave like commands in case any files happen
 # to share the name of the coresponding make target
-.PHONY: all thesis abstract latex pdf draft html doc clean purge
+.PHONY: all thesis abstract latex overleaf pdf draft html doc clean purge
 
 # Recipes for complete targets via pandoc
 
@@ -181,6 +184,17 @@ $(LATEX_ABSTRACT): _tmp/abstract.tex
 	@echo "Compiling $< to _tmp/pandoc.pdf"
 	@pdflatex -interaction=nonstopmode --output-directory=_tmp $< &> /dev/null
 	mv _tmp/abstract.pdf $@
+
+$(OVERLEAF_TARGET): _tmp/overleaf.tex $(BEFORE) $(AFTER)
+	@mkdir -p $(@D)
+	@echo "Compiling $< to _tmp/overleaf.pdf"
+	@pdflatex -interaction=nonstopmode --shell-escape --output-directory=_tmp $< &> /dev/null
+	@echo "Running bibtex"
+	@TEXMFOUTPUT="_tmp:" BIBINPUTS="$(BIB_DIR):" BSTINPUTS="$(BIB_DIR):" bibtex _tmp/overleaf &> /dev/null
+	@echo "Updating references in _tmp/overleaf.pdf"
+	@pdflatex -interaction=nonstopmode --shell-escape --output-directory=_tmp $< &> /dev/null
+	@pdflatex -interaction=nonstopmode --shell-escape --output-directory=_tmp $< &> /dev/null
+	mv _tmp/overleaf.pdf $@
 
 # Recipes to build single files
 
@@ -246,6 +260,22 @@ _tmp/pandoc.tex: $(CHAPTERS) $(SETTINGS) $(BEFORE) $(AFTER) $(PANDOC_REQUIRES) t
 	@mv $@ $@.tmp && sed 's/templates\/sfsection/\.\.\/templates\/sfsection/g' < $@.tmp > $@
 	@echo "Adjusting figure directory in $@ to $(GRAPHICS_DIR)/"
 	@mv $@ $@.tmp && awk '1;/templates\/sfsection/{print "\\graphicspath{{../$(GRAPHICS_DIR)}}"}' < $@.tmp > $@
+	@mv $@ $@.tmp && awk '1;/\\usepackage{svg}/{print "\\svgpath{$(GRAPHICS_DIR)/}"}' < $@.tmp > $@
+	@mv $@ $@.tmp && sed 's/\\usepackage{svg}/\\usepackage[inkscapepath=_tmp]{svg}/' < $@.tmp > $@
+	@rm $@.tmp
+
+_tmp/overleaf.tex: $(CHAPTERS) $(SETTINGS) $(PANDOC_REQUIRES) templates/overleaf.tex
+	@mkdir -p $(@D)
+	@echo "Building $@ from $(SETTINGS) and $(SETTINGS_EXTRAS)"
+	@$(PANDOC) -o $@ $(OVERLEAF_OPTIONS) $(CHAPTERS)
+	@echo "Adjusting location of sfchap in $@ to point to templates/"
+	@mv $@ $@.tmp && sed 's/sfchap/\.\.\/templates\/sfchap/g' < $@.tmp > $@
+	@echo "Adjusting location of sfsection in $@ to point to templates/"
+	@mv $@ $@.tmp && sed 's/sfsection/\.\.\/templates\/sfsection/g' < $@.tmp > $@
+	@echo "Adjusting input paths in $@ to point to _tmp/"
+	@mv $@ $@.tmp && sed 's/\\input{\(.*\)}/\\input{_tmp\/\1}/g' < $@.tmp > $@
+	@echo "Adjusting figure directory in $@ to $(GRAPHICS_DIR)/"
+	@mv $@ $@.tmp && sed 's/\\graphicspath{{\(.*\)}}/\\graphicspath{{\.\.\/$(GRAPHICS_DIR)}}/g' < $@.tmp > $@
 	@mv $@ $@.tmp && awk '1;/\\usepackage{svg}/{print "\\svgpath{$(GRAPHICS_DIR)/}"}' < $@.tmp > $@
 	@mv $@ $@.tmp && sed 's/\\usepackage{svg}/\\usepackage[inkscapepath=_tmp]{svg}/' < $@.tmp > $@
 	@rm $@.tmp
