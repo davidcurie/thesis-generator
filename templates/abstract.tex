@@ -1,0 +1,29 @@
+\documentclass{article}
+\usepackage{fancyhdr}
+\usepackage{fancyheadings}
+\usepackage{setspace}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\pagestyle{fancy}
+\rhead{$major$}
+\cfoot{}
+
+\begin{document}
+\doublespacing
+\begin{center}
+    $title-meta$\\[1.5em]
+
+    $author-meta$\\[1.5em]
+
+\underline{Dissertation under the direction of Professor $chair.name$}
+
+$body$
+
+\vfill
+\begin{tabular}{@{}p{0.5in}p{2.5in}p{0.3in}p{1in}@{}}
+    Approved: & \hrulefill & Date: & \hrulefill \\
+              & $chair.name$, $chair.title$ & & \\
+\end{tabular}
+\end{center}
+\end{document}

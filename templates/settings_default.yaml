@@ -1,0 +1,22 @@
+title: "A placeholder title"
+author: First Last
+institution: Institutiion
+degree: Degree
+major: Major
+date: Month Day, Year
+location: City, State
+chair:
+    name: First Last
+    title: Ph.D.
+committee:
+  - name: First Last
+    title: MD
+geometry:
+  - layout=letterpaper
+  - top=1in
+  - bottom=1in
+  - inner=1in
+  - outer=1in
+  - heightrounded
+linestretch: 1
+reference-section-title: References

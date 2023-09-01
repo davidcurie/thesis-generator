@@ -1,0 +1,43 @@
+\thispagestyle{empty}
+\begin{center}
+\doublespacing
+$title-meta$
+
+$if(subtitle)$
+$subtitle$\\
+$endif$
+
+By
+
+$author-meta$\\[2em]
+
+Dissertation\\
+Submitted to the Faculty of the\\
+Graduate School of $institution$\\
+in partial fulfillment of the requirements\\
+for the degree of\\
+
+\uppercase{$degree$}
+
+in
+
+$major$
+
+$date$
+
+$location$\\
+\end{center}
+
+\vfill
+\begin{center}
+\begin{tabular*}{\textwidth}{@{}p{0.7\textwidth}p{0.2\textwidth}@{}}
+    Approved: & Date: \\[3em]
+\hrulefill & \hrulefill\\
+$chair.name$, $chair.title$ & \\
+$for(committee)$
+ &\\[1.5em]
+\hrulefill & \hrulefill\\
+$committee.name$, $committee.title$\\
+$endfor$
+\end{tabular*}
+\end{center}

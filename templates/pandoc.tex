@@ -1,3 +1,29 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This is a modified Pandoc latex template. When used with Pandoc and
+% supplied with appropriate run-time variables, this template will
+% produce a latex document that meets the requirements set forth by the
+% Vanderbilt University Graduate School for submission of dissertations.
+%
+% This template avoids hard coding any explicit rules except when
+% no command line option is available. A minimum set of required Pandoc
+% parameters lives in a formatting.yaml file located in the same
+% directory as this file. User-specific modifications are expected to
+% come from a metadata file outside of the template directory.
+%
+% The following explicit overrides have been made to the default Pandoc
+% template for latex files:
+%
+% - Remove Title and Abstract sections because these are generated
+%   elsewhere in this project
+% - Make List of Tables appear before List of Figures in TOC
+% - Explicitly define chapter and section rules from sfchap.sty and sfsection.sty
+%     - We can't define this with header-includes in a global YAML file
+%       because it will be overwritten if the user specifies any other required
+%       packages in their own metadata
+% - Replace /backmatter with /appendix (Removes explicit support for Index formatting)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 % Options for packages loaded elsewhere
 \PassOptionsToPackage{unicode$for(hyperrefoptions)$,$hyperrefoptions$$endfor$}{hyperref}
 \PassOptionsToPackage{hyphens}{url}
@@ -377,6 +403,8 @@ $endfor$
 \let\LanguageShortHands\languageshorthands
 \def\languageshorthands#1{}
 $endif$
+\usepackage{templates/sfchap}
+\usepackage{templates/sfsection}
 $for(header-includes)$
 $header-includes$
 $endfor$
@@ -448,50 +476,9 @@ $endif$
 $endif$
   pdfcreator={LaTeX via pandoc}}
 
-$if(title)$
-\title{$title$$if(thanks)$\thanks{$thanks$}$endif$}
-$endif$
-$if(subtitle)$
-$if(beamer)$
-$else$
-\usepackage{etoolbox}
-\makeatletter
-\providecommand{\subtitle}[1]{% add subtitle to \maketitle
-  \apptocmd{\@title}{\par {\large #1 \par}}{}{}
-}
-\makeatother
-$endif$
-\subtitle{$subtitle$}
-$endif$
-\author{$for(author)$$author$$sep$ \and $endfor$}
-\date{$date$}
-$if(beamer)$
-$if(institute)$
-\institute{$for(institute)$$institute$$sep$ \and $endfor$}
-$endif$
-$if(titlegraphic)$
-\titlegraphic{\includegraphics{$titlegraphic$}}
-$endif$
-$if(logo)$
-\logo{\includegraphics{$logo$}}
-$endif$
-$endif$
-
 \begin{document}
 $if(has-frontmatter)$
 \frontmatter
-$endif$
-$if(title)$
-$if(beamer)$
-\frame{\titlepage}
-$else$
-\maketitle
-$endif$
-$if(abstract)$
-\begin{abstract}
-$abstract$
-\end{abstract}
-$endif$
 $endif$
 
 $for(include-before)$
@@ -519,11 +506,11 @@ $endif$
 }
 $endif$
 $endif$
-$if(lof)$
-\listoffigures
-$endif$
 $if(lot)$
 \listoftables
+$endif$
+$if(lof)$
+\listoffigures
 $endif$
 $if(linestretch)$
 \setstretch{$linestretch$}
@@ -534,7 +521,7 @@ $endif$
 $body$
 
 $if(has-frontmatter)$
-\backmatter
+\appendix
 $endif$
 $if(natbib)$
 $if(bibliography)$
