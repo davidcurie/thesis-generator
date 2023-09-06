@@ -89,6 +89,7 @@ THESIS_TARGET := _build/pandoc/$(FILE_NAME).pdf
 THESIS_ABSTRACT := _build/pandoc/$(FILE_NAME)_abstract.pdf
 PDF_TARGETS := $(patsubst $(SOURCE_DIR)/%$(EXT),_build/pdf/%.pdf,$(CHAPTERS))
 HTML_TARGETS := $(patsubst $(SOURCE_DIR)/%$(EXT),_build/html/%.html,$(CHAPTERS))
+DOC_TARGETS := $(patsubst $(SOURCE_DIR)/%$(EXT),_build/doc/%.docx,$(CHAPTERS))
 
 # Settings
 USER_OPTIONS = $(foreach file, $(SETTINGS),--metadata-file=$(file))
@@ -103,6 +104,7 @@ HTML_OPTIONS = $(PANDOC_OPTIONS) \
 				--mathjax \
 				$(foreach style, $(CSS),--css=$(style)) \
 				$(foreach injection, $(JS),-H $(injection))
+DOC_OPTIONS = $(PANDOC_OPTIONS)
 SIMPLIFY = --metadata=toc:false --metadata=lot:false --metadata=lof:false \
 				--metadata=title:"" --metadata=subtitle:"" --metadata=author:"" --metadata=date:"" \
 				--metadata=numbersections:false --quiet
@@ -119,13 +121,14 @@ THESIS_REQUIRES = $(PANDOC_REQUIRES) \
 				$(TEMPLATE_DIR)/sfchap.sty \
 				$(TEMPLATE_DIR)/sfsection.sty
 
-all: clean thesis pdf html
+all: clean thesis pdf html doc
 
 # TARGETS get expanded to a list of files; any file that doesn't yet
 # exist in this list gets built according to the recipe for the target
 thesis: $(THESIS_TARGET) $(THESIS_ABSTRACT)
 pdf: $(PDF_TARGETS) 
 html: $(HTML_TARGETS)
+doc: $(DOC_TARGETS)
 
 clean:
 	rm -rf _build
@@ -160,6 +163,11 @@ _build/html/%.html: $(SOURCE_DIR)/%$(EXT) $(CSS) $(JS) $(PANDOC_REQUIRES)
 	@mkdir -p $(@D)
 	@echo "Building $@ from $<"
 	@$(PANDOC) -o $@ $(HTML_OPTIONS) $(SIMPLIFY) $<
+
+_build/doc/%.docx: $(SOURCE_DIR)/%$(EXT) $(PANDOC_REQUIRES)
+	@mkdir -p $(@D)
+	@echo "Building $@ from $<"
+	@$(PANDOC) -o $@ $(DOC_OPTIONS) $(SIMPLIFY) $<
 
 # Recipes to build required dependencies
 

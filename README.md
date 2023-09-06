@@ -299,6 +299,12 @@ Make a responsive HTML page of each chapter:
 make html
 ```
 
+Make a Word document of each chapter:
+
+```bash
+make doc
+```
+
 ## File maintenance
 
 Generate a thesis, abstract, and a review document of each chapter in all
