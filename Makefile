@@ -87,6 +87,8 @@ endif
 # Files we can build on demand
 THESIS_TARGET := _build/pandoc/$(FILE_NAME).pdf
 THESIS_ABSTRACT := _build/pandoc/$(FILE_NAME)_abstract.pdf
+LATEX_TARGET := _build/latex/$(FILE_NAME).pdf
+LATEX_ABSTRACT := _build/latex/$(FILE_NAME)_abstract.pdf
 PDF_TARGETS := $(patsubst $(SOURCE_DIR)/%$(EXT),_build/pdf/%.pdf,$(CHAPTERS))
 DRAFT_TARGETS := $(patsubst $(SOURCE_DIR)/%$(EXT),_build/draft/%.pdf,$(CHAPTERS))
 HTML_TARGETS := $(patsubst $(SOURCE_DIR)/%$(EXT),_build/html/%.html,$(CHAPTERS))
@@ -114,6 +116,10 @@ ABSTRACT_OPTIONS = $(GENERAL_OPTIONS) --template=templates/abstract.tex
 THESIS_OPTIONS = $(foreach file, $(BEFORE),-B $(file)) \
 				$(foreach file, $(AFTER),-A $(file)) \
 				$(PDF_OPTIONS)
+LATEX_OPTIONS = $(foreach file, $(BEFORE),-B $(file)) \
+				$(foreach file, $(AFTER),-A $(file)) \
+				$(COMMON_OPTIONS) \
+				--template=templates/pandoc.tex --natbib
 
 # Files we want to trigger a rebuild if updated
 PANDOC_REQUIRES = $(TEMPLATE_DIR)/settings_default.yaml \
@@ -128,6 +134,8 @@ all: clean thesis pdf html doc
 # TARGETS get expanded to a list of files; any file that doesn't yet
 # exist in this list gets built according to the recipe for the target
 thesis: $(THESIS_TARGET) $(THESIS_ABSTRACT)
+abstract: $(LATEX_ABSTRACT)
+latex: $(LATEX_TARGET)
 pdf: $(PDF_TARGETS) 
 html: $(HTML_TARGETS)
 doc: $(DOC_TARGETS)
@@ -141,7 +149,7 @@ purge:
 
 # Make the above recipes behave like commands in case any files happen
 # to share the name of the coresponding make target
-.PHONY: all thesis pdf draft html doc clean purge
+.PHONY: all thesis abstract latex pdf draft html doc clean purge
 
 # Recipes for complete targets via pandoc
 
@@ -154,6 +162,25 @@ $(THESIS_ABSTRACT): $(ABSTRACT) $(PANDOC_REQUIRES) templates/abstract.tex
 	@mkdir -p $(@D)
 	@echo "Building $@ from $<"
 	@$(PANDOC) -o $@ $(ABSTRACT_OPTIONS) $<
+
+# Recipes for explicit builds
+
+$(LATEX_TARGET): _tmp/pandoc.tex $(THESIS_REQUIRES)
+	@mkdir -p $(@D)
+	@echo "Compiling $< to _tmp/pandoc.pdf"
+	@pdflatex -interaction=nonstopmode --shell-escape --output-directory=_tmp $< &> /dev/null
+	@echo "Running bibtex"
+	@TEXMFOUTPUT="_tmp:" BIBINPUTS="$(BIB_DIR):" BSTINPUTS="$(BIB_DIR):" bibtex _tmp/pandoc &> /dev/null
+	@echo "Updating references in _tmp/pandoc.pdf"
+	@pdflatex -interaction=nonstopmode --shell-escape --output-directory=_tmp $< &> /dev/null
+	@pdflatex -interaction=nonstopmode --shell-escape --output-directory=_tmp $< &> /dev/null
+	mv _tmp/pandoc.pdf $@
+
+$(LATEX_ABSTRACT): _tmp/abstract.tex
+	@mkdir -p $(@D)
+	@echo "Compiling $< to _tmp/pandoc.pdf"
+	@pdflatex -interaction=nonstopmode --output-directory=_tmp $< &> /dev/null
+	mv _tmp/abstract.pdf $@
 
 # Recipes to build single files
 
@@ -203,3 +230,22 @@ _tmp/appendix.tex: $(APPENDICES) $(PANDOC_REQUIRES)
 	@mkdir -p $(@D)
 	@echo "Building $@ from $(APPENDICES)"
 	@$(PANDOC) -o $@ $(PANDOC_OPTIONS) $(APPENDICES)
+
+_tmp/abstract.tex: $(ABSTRACT) $(PANDOC_REQUIRES) templates/abstract.tex
+	@mkdir -p $(@D)
+	@echo "Building $@ from $<"
+	@$(PANDOC) -o $@ $(ABSTRACT_OPTIONS) $<
+
+_tmp/pandoc.tex: $(CHAPTERS) $(SETTINGS) $(BEFORE) $(AFTER) $(PANDOC_REQUIRES) templates/pandoc.tex
+	@mkdir -p $(@D)
+	@echo "Building $@ from templates/$(@F) and $(SETTINGS)"
+	@$(PANDOC) -o $@ $(LATEX_OPTIONS) $(CHAPTERS)
+	@echo "Adjusting location of sfchap in $@ to point to templates/"
+	@mv $@ $@.tmp && sed 's/templates\/sfchap/\.\.\/templates\/sfchap/g' < $@.tmp > $@
+	@echo "Adjusting location of sfsection in $@ to point to templates/"
+	@mv $@ $@.tmp && sed 's/templates\/sfsection/\.\.\/templates\/sfsection/g' < $@.tmp > $@
+	@echo "Adjusting figure directory in $@ to $(GRAPHICS_DIR)/"
+	@mv $@ $@.tmp && awk '1;/templates\/sfsection/{print "\\graphicspath{{../$(GRAPHICS_DIR)}}"}' < $@.tmp > $@
+	@mv $@ $@.tmp && awk '1;/\\usepackage{svg}/{print "\\svgpath{$(GRAPHICS_DIR)/}"}' < $@.tmp > $@
+	@mv $@ $@.tmp && sed 's/\\usepackage{svg}/\\usepackage[inkscapepath=_tmp]{svg}/' < $@.tmp > $@
+	@rm $@.tmp
