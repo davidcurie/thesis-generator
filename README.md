@@ -33,7 +33,7 @@ See the available [commands](#commands) below.
 ## Requirements
 
 - [Make](https://www.gnu.org/software/make/)
-- [Pandoc](https://pandoc.org/index.html)
+- [Pandoc](https://pandoc.org/index.html) version >= 3.1.7
 - [LaTeX distribution](https://www.latex-project.org)
 
 ### Required files to edit
