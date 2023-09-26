@@ -156,6 +156,15 @@ cd path/to/thesis/
 make thesis
 ```
 
+> To explore a minimum working example of a thesis project, see this [example][example] branch on GitHub.
+>
+> If you cloned this repository:
+>````bash
+> git switch example
+>````
+
+[example]: https://www.github.com/davidcurie/thesis-generator/tree/example
+
 ### Updating
 
 The templates in this repository may need to be updated from time to time,
