@@ -1,5 +1,23 @@
 # A thesis generator for Vanderbilt University
 
+> You are in an extended branch of the main repository. This branch contains
+example source files in appropriate locations that are known to the Makefile
+supplied by this project. These sample files are best explored from your
+personal computer where you can run the `make` commands and see the output
+yourself.
+>
+>````bash
+> git clone https://github.com/davidcurie/thesis-generator.git
+> git switch example
+> make <target>
+>````
+>
+> where `<target>` is replaced by any option outlined in the
+[commands](#commands).
+>
+> If you plan on using this repository to track changes to and maintain your
+own thesis on GitHub, you want a fork.
+
 This repository provides an automated mechanism to generate all parts of
 a thesis for submission to the Vanderbilt University Graduate School. It also
 provides a means to generate draft documents of individual chapters in
