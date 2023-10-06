@@ -36,19 +36,19 @@ EXT ?= .md
 FILE_NAME ?= thesis
 
 # Files we want to find dynamically
-SETTINGS := $(shell find $(SETTINGS_DIR) -type f \( -iname '*.yaml' -or -iname '*.yml' \)| sort)
-CHAPTERS := $(shell find $(SOURCE_DIR) -type f -iname '*$(EXT)' | sort)
-ABSTRACT := $(shell find $(ABSTRACT_DIR) -type f -iname '*abstract*$(EXT)')
-COPYRIGHT := $(shell find $(FRONTMATTER_DIR) -type f -iname '*copyright*$(EXT)')
-DEDICATION := $(shell find $(FRONTMATTER_DIR) -type f -iname '*dedication*$(EXT)')
-ACKNOWLEDGMENTS := $(shell find $(FRONTMATTER_DIR) -type f -iname '*acknowledgment*$(EXT)')
-NOMENCLATURE := $(shell find $(FRONTMATTER_DIR) -type f -iname '*nomenclature*')
-APPENDICES := $(shell find $(BACKMATTER_DIR) -type f -iname '*appendix*$(EXT)'| sort)
-TEMPLATES := $(shell find $(TEMPLATE_DIR) -type f -name '*')
-BIBLIOGRAPHY := $(shell find $(BIB_DIR) -maxdepth 1 -type f -iname '*.bib')
-CSL := $(shell find $(CSL_DIR) -maxdepth 1 -type f -iname '*.csl')
-CSS := $(shell find $(CSS_DIR) -type f -iname '*.css')
-JS := $(shell find $(JS_DIR) -type f -name '*')
+SETTINGS := $(wildcard $(SETTINGS_DIR)/*.yml $(SETTINGS_DIR)/*.yaml)
+CHAPTERS := $(wildcard $(SOURCE_DIR)/*)
+ABSTRACT := $(wildcard $(ABSTRACT_DIR)/*abstract*)
+COPYRIGHT := $(wildcard $(FRONTMATTER_DIR)/*copyright*)
+DEDICATION := $(wildcard $(FRONTMATTER_DIR)/*dedication*)
+ACKNOWLEDGMENTS := $(wildcard $(FRONTMATTER_DIR)/*acknowledgment*)
+NOMENCLATURE := $(wildcard $(FRONTMATTER_DIR)/*nomenclature*)
+APPENDICES := $(wildcard $(BACKMATTER_DIR)*appendix*)
+TEMPLATES := $(wildcard $(TEMPLATE_DIR)/*)
+BIBLIOGRAPHY := $(wildcard $(BIB_DIR)/*.bib)
+CSL := $(wildcard $(CSL_DIR)/*.csl)
+CSS := $(wildcard $(CSS_DIR)/*.css)
+JS := $(wildcard $(JS_DIR)/*)
 
 # Detect appropriate run-time options
 ifneq ('$(BIBLIOGRAPHY)','')
