@@ -32,7 +32,6 @@ BIB_DIR ?= extras
 CSL_DIR ?= extras
 CSS_DIR ?= extras/css
 JS_DIR ?= extras/js
-EXT ?= .md
 FILE_NAME ?= thesis
 
 # Files we want to find dynamically
@@ -90,10 +89,10 @@ THESIS_ABSTRACT := _build/pandoc/$(FILE_NAME)_abstract.pdf
 LATEX_TARGET := _build/latex/$(FILE_NAME).pdf
 LATEX_ABSTRACT := _build/latex/$(FILE_NAME)_abstract.pdf
 OVERLEAF_TARGET := _build/overleaf/$(FILE_NAME).pdf
-PDF_TARGETS := $(patsubst $(SOURCE_DIR)/%$(EXT),_build/pdf/%.pdf,$(CHAPTERS))
-DRAFT_TARGETS := $(patsubst $(SOURCE_DIR)/%$(EXT),_build/draft/%.pdf,$(CHAPTERS))
-HTML_TARGETS := $(patsubst $(SOURCE_DIR)/%$(EXT),_build/html/%.html,$(CHAPTERS))
-DOC_TARGETS := $(patsubst $(SOURCE_DIR)/%$(EXT),_build/doc/%.docx,$(CHAPTERS))
+PDF_TARGETS := $(patsubst $(SOURCE_DIR)/%,_build/pdf/%.pdf,$(basename $(CHAPTERS)))
+DRAFT_TARGETS := $(patsubst $(SOURCE_DIR)/%,_build/draft/%.pdf,$(basename $(CHAPTERS)))
+HTML_TARGETS := $(patsubst $(SOURCE_DIR)/%,_build/html/%.html,$(basename $(CHAPTERS)))
+DOC_TARGETS := $(patsubst $(SOURCE_DIR)/%,_build/doc/%.docx,$(basename $(CHAPTERS)))
 
 # Settings
 USER_OPTIONS = $(foreach file, $(SETTINGS),--metadata-file=$(file))
@@ -198,22 +197,22 @@ $(OVERLEAF_TARGET): _tmp/overleaf.tex $(BEFORE) $(AFTER)
 
 # Recipes to build single files
 
-_build/pdf/%.pdf: $(SOURCE_DIR)/%$(EXT) $(PANDOC_REQUIRES) templates/pandoc.tex
+_build/pdf/%.pdf: $(SOURCE_DIR)/%.* $(PANDOC_REQUIRES) templates/pandoc.tex
 	@mkdir -p $(@D)
 	@echo "Building $@ from $<"
 	@$(PANDOC) -o $@ $(PDF_OPTIONS) $(SIMPLIFY) $<
 
-_build/draft/%.pdf: $(SOURCE_DIR)/%$(EXT) $(PANDOC_REQUIRES) templates/pandoc.tex templates/draft.sty
+_build/draft/%.pdf: $(SOURCE_DIR)/%.* $(PANDOC_REQUIRES) templates/pandoc.tex templates/draft.sty
 	@mkdir -p $(@D)
 	@echo "Building $@ from $<"
 	@$(PANDOC) -o $@ $(PDF_OPTIONS) $(DRAFT) $<
 
-_build/html/%.html: $(SOURCE_DIR)/%$(EXT) $(CSS) $(JS) $(PANDOC_REQUIRES)
+_build/html/%.html: $(SOURCE_DIR)/%.* $(CSS) $(JS) $(PANDOC_REQUIRES)
 	@mkdir -p $(@D)
 	@echo "Building $@ from $<"
 	@$(PANDOC) -o $@ $(HTML_OPTIONS) $(SIMPLIFY) $<
 
-_build/doc/%.docx: $(SOURCE_DIR)/%$(EXT) $(PANDOC_REQUIRES)
+_build/doc/%.docx: $(SOURCE_DIR)/%.* $(PANDOC_REQUIRES)
 	@mkdir -p $(@D)
 	@echo "Building $@ from $<"
 	@$(PANDOC) -o $@ $(DOC_OPTIONS) $(SIMPLIFY) $<
