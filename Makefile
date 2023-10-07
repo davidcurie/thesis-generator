@@ -50,6 +50,12 @@ CSS := $(wildcard $(CSS_DIR)/*.css)
 JS := $(wildcard $(JS_DIR)/*)
 
 # Detect appropriate run-time options
+ifeq ($(OS),Windows_NT) 
+NULL = NUL
+else
+NULL = /dev/null
+endif
+
 ifneq ('$(BIBLIOGRAPHY)','')
 BIB_OPTIONS += --bibliography=$(BIBLIOGRAPHY)
 endif
@@ -168,27 +174,27 @@ $(THESIS_ABSTRACT): $(ABSTRACT) $(PANDOC_REQUIRES) templates/abstract.tex | _bui
 
 $(LATEX_TARGET): _tmp/pandoc.tex $(THESIS_REQUIRES) | _build/latex
 	@echo "Compiling $< to _tmp/pandoc.pdf"
-	@pdflatex -interaction=nonstopmode --shell-escape --output-directory=_tmp $< &> /dev/null
+	@pdflatex -interaction=nonstopmode --shell-escape --output-directory=_tmp $< &> $(NULL)
 	@echo "Running bibtex"
-	@TEXMFOUTPUT="_tmp:" BIBINPUTS="$(BIB_DIR):" BSTINPUTS="$(BIB_DIR):" bibtex _tmp/pandoc &> /dev/null
+	@TEXMFOUTPUT="_tmp:" BIBINPUTS="$(BIB_DIR):" BSTINPUTS="$(BIB_DIR):" bibtex _tmp/pandoc &> $(NULL)
 	@echo "Updating references in _tmp/pandoc.pdf"
-	@pdflatex -interaction=nonstopmode --shell-escape --output-directory=_tmp $< &> /dev/null
-	@pdflatex -interaction=nonstopmode --shell-escape --output-directory=_tmp $< &> /dev/null
+	@pdflatex -interaction=nonstopmode --shell-escape --output-directory=_tmp $< &> $(NULL)
+	@pdflatex -interaction=nonstopmode --shell-escape --output-directory=_tmp $< &> $(NULL)
 	mv _tmp/pandoc.pdf $@
 
 $(LATEX_ABSTRACT): _tmp/abstract.tex | _build/latex
 	@echo "Compiling $< to _tmp/pandoc.pdf"
-	@pdflatex -interaction=nonstopmode --output-directory=_tmp $< &> /dev/null
+	@pdflatex -interaction=nonstopmode --output-directory=_tmp $< &> $(NULL)
 	mv _tmp/abstract.pdf $@
 
 $(OVERLEAF_TARGET): _tmp/overleaf.tex $(BEFORE) $(AFTER) | _build/overleaf
 	@echo "Compiling $< to _tmp/overleaf.pdf"
-	@pdflatex -interaction=nonstopmode --shell-escape --output-directory=_tmp $< &> /dev/null
+	@pdflatex -interaction=nonstopmode --shell-escape --output-directory=_tmp $< &> $(NULL)
 	@echo "Running bibtex"
-	@TEXMFOUTPUT="_tmp:" BIBINPUTS="$(BIB_DIR):" BSTINPUTS="$(BIB_DIR):" bibtex _tmp/overleaf &> /dev/null
+	@TEXMFOUTPUT="_tmp:" BIBINPUTS="$(BIB_DIR):" BSTINPUTS="$(BIB_DIR):" bibtex _tmp/overleaf &> $(NULL)
 	@echo "Updating references in _tmp/overleaf.pdf"
-	@pdflatex -interaction=nonstopmode --shell-escape --output-directory=_tmp $< &> /dev/null
-	@pdflatex -interaction=nonstopmode --shell-escape --output-directory=_tmp $< &> /dev/null
+	@pdflatex -interaction=nonstopmode --shell-escape --output-directory=_tmp $< &> $(NULL)
+	@pdflatex -interaction=nonstopmode --shell-escape --output-directory=_tmp $< &> $(NULL)
 	mv _tmp/overleaf.pdf $@
 
 # Recipes to build single files
@@ -219,8 +225,10 @@ _build/doc/%.docx: $(SOURCE_DIR)/%.* $(PANDOC_REQUIRES) | _build/doc
 # Recipes to build required dependencies
 
 _tmp/title.tex: $(PANDOC_REQUIRES) templates/title.tex | _tmp
+	@touch _tmp/null
 	@echo "Building $@ from settings and templates/$(@F)"
-	@$(PANDOC) -o $@ -f markdown --template=templates/$(@F) $(PANDOC_OPTIONS) /dev/null
+	@$(PANDOC) -o $@ -f markdown --template=templates/$(@F) $(PANDOC_OPTIONS) _tmp/null
+	@rm _tmp/null
 
 _tmp/copyright.tex: $(COPYRIGHT) $(PANDOC_REQUIRES) templates/copyright.tex | _tmp
 	@echo "Building $@ from $<"
