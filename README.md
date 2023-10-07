@@ -26,9 +26,15 @@ but often requires many command-line options. Wrapping these `pandoc`
 incantations in a single makefile allows for pain-free generation of target
 files simply by using `make <target>` instead.
 
-See the available [commands](#commands) below.
+See the available [commands provided by this Makefile](#commands) below.
+
+> If you haven't used Make before, learn more about [Reproducibility with
+Make][turing], or view the basics on how you can use [markdown and makefiles to
+automate publishing][markdown-and-makefiles].
 
 [Vanderbilt-overleaf]: https://www.overleaf.com/latex/templates/vanderbilt-university-dissertation-template/fmqpcfjqtgyq
+[turing]: https://the-turing-way.netlify.app/reproducible-research/make
+[markdown-and-makefiles]: https://chrisman.github.io/3.html
 
 ## Requirements
 
