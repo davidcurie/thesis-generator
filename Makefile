@@ -155,20 +155,17 @@ purge:
 
 # Recipes for complete targets via pandoc
 
-$(THESIS_TARGET): $(CHAPTERS) $(BEFORE) $(AFTER) $(THESIS_REQUIRES)
-	@mkdir -p $(@D)
+$(THESIS_TARGET): $(CHAPTERS) $(BEFORE) $(AFTER) $(THESIS_REQUIRES) | _build/pandoc
 	@echo "Building $@ from $(CHAPTERS)"
 	@$(PANDOC) -o $@ $(THESIS_OPTIONS) $(CHAPTERS)
 
-$(THESIS_ABSTRACT): $(ABSTRACT) $(PANDOC_REQUIRES) templates/abstract.tex
-	@mkdir -p $(@D)
+$(THESIS_ABSTRACT): $(ABSTRACT) $(PANDOC_REQUIRES) templates/abstract.tex | _build/pandoc
 	@echo "Building $@ from $<"
 	@$(PANDOC) -o $@ $(ABSTRACT_OPTIONS) $<
 
 # Recipes for explicit builds
 
-$(LATEX_TARGET): _tmp/pandoc.tex $(THESIS_REQUIRES)
-	@mkdir -p $(@D)
+$(LATEX_TARGET): _tmp/pandoc.tex $(THESIS_REQUIRES) | _build/latex
 	@echo "Compiling $< to _tmp/pandoc.pdf"
 	@pdflatex -interaction=nonstopmode --shell-escape --output-directory=_tmp $< &> /dev/null
 	@echo "Running bibtex"
@@ -178,14 +175,12 @@ $(LATEX_TARGET): _tmp/pandoc.tex $(THESIS_REQUIRES)
 	@pdflatex -interaction=nonstopmode --shell-escape --output-directory=_tmp $< &> /dev/null
 	mv _tmp/pandoc.pdf $@
 
-$(LATEX_ABSTRACT): _tmp/abstract.tex
-	@mkdir -p $(@D)
+$(LATEX_ABSTRACT): _tmp/abstract.tex | _build/latex
 	@echo "Compiling $< to _tmp/pandoc.pdf"
 	@pdflatex -interaction=nonstopmode --output-directory=_tmp $< &> /dev/null
 	mv _tmp/abstract.pdf $@
 
-$(OVERLEAF_TARGET): _tmp/overleaf.tex $(BEFORE) $(AFTER)
-	@mkdir -p $(@D)
+$(OVERLEAF_TARGET): _tmp/overleaf.tex $(BEFORE) $(AFTER) | _build/overleaf
 	@echo "Compiling $< to _tmp/overleaf.pdf"
 	@pdflatex -interaction=nonstopmode --shell-escape --output-directory=_tmp $< &> /dev/null
 	@echo "Running bibtex"
@@ -197,60 +192,55 @@ $(OVERLEAF_TARGET): _tmp/overleaf.tex $(BEFORE) $(AFTER)
 
 # Recipes to build single files
 
-_build/pdf/%.pdf: $(SOURCE_DIR)/%.* $(PANDOC_REQUIRES) templates/pandoc.tex
-	@mkdir -p $(@D)
+_build _tmp:
+	@mkdir $@
+
+_build/pdf _build/draft _build/html _build/doc _build/pandoc _build/latex _build/overleaf: | _build
+	@mkdir $@
+
+_build/pdf/%.pdf: $(SOURCE_DIR)/%.* $(PANDOC_REQUIRES) templates/pandoc.tex | _build/pdf
 	@echo "Building $@ from $<"
 	@$(PANDOC) -o $@ $(PDF_OPTIONS) $(SIMPLIFY) $<
 
-_build/draft/%.pdf: $(SOURCE_DIR)/%.* $(PANDOC_REQUIRES) templates/pandoc.tex templates/draft.sty
-	@mkdir -p $(@D)
+_build/draft/%.pdf: $(SOURCE_DIR)/%.* $(PANDOC_REQUIRES) templates/pandoc.tex templates/draft.sty | _build/draft
 	@echo "Building $@ from $<"
 	@$(PANDOC) -o $@ $(PDF_OPTIONS) $(DRAFT) $<
 
-_build/html/%.html: $(SOURCE_DIR)/%.* $(CSS) $(JS) $(PANDOC_REQUIRES)
-	@mkdir -p $(@D)
+_build/html/%.html: $(SOURCE_DIR)/%.* $(CSS) $(JS) $(PANDOC_REQUIRES) | _build/html
 	@echo "Building $@ from $<"
 	@$(PANDOC) -o $@ $(HTML_OPTIONS) $(SIMPLIFY) $<
 
-_build/doc/%.docx: $(SOURCE_DIR)/%.* $(PANDOC_REQUIRES)
-	@mkdir -p $(@D)
+_build/doc/%.docx: $(SOURCE_DIR)/%.* $(PANDOC_REQUIRES) | _build/doc
 	@echo "Building $@ from $<"
 	@$(PANDOC) -o $@ $(DOC_OPTIONS) $(SIMPLIFY) $<
 
 # Recipes to build required dependencies
 
-_tmp/title.tex: $(PANDOC_REQUIRES) templates/title.tex
-	@mkdir -p $(@D)
+_tmp/title.tex: $(PANDOC_REQUIRES) templates/title.tex | _tmp
 	@echo "Building $@ from settings and templates/$(@F)"
 	@$(PANDOC) -o $@ -f markdown --template=templates/$(@F) $(PANDOC_OPTIONS) /dev/null
 
-_tmp/copyright.tex: $(COPYRIGHT) $(PANDOC_REQUIRES) templates/copyright.tex
-	@mkdir -p $(@D)
+_tmp/copyright.tex: $(COPYRIGHT) $(PANDOC_REQUIRES) templates/copyright.tex | _tmp
 	@echo "Building $@ from $<"
 	@$(PANDOC) -o $@ --template=templates/$(@F) $(PANDOC_OPTIONS) $<
 
-_tmp/dedication.tex: $(DEDICATION) $(PANDOC_REQUIRES) templates/dedication.tex
-	@mkdir -p $(@D)
+_tmp/dedication.tex: $(DEDICATION) $(PANDOC_REQUIRES) templates/dedication.tex | _tmp
 	@echo "Building $@ from $<"
 	@$(PANDOC) -o $@ --template=templates/$(@F) $(PANDOC_OPTIONS) $<
 
-_tmp/acknowledgments.tex: $(ACKNOWLEDGMENTS) $(PANDOC_REQUIRES) templates/acknowledgments.tex
-	@mkdir -p $(@D)
+_tmp/acknowledgments.tex: $(ACKNOWLEDGMENTS) $(PANDOC_REQUIRES) templates/acknowledgments.tex | _tmp
 	@echo "Building $@ from $<"
 	@$(PANDOC) -o $@ --template=templates/$(@F) $(PANDOC_OPTIONS) $<
 
-_tmp/appendix.tex: $(APPENDICES) $(PANDOC_REQUIRES)
-	@mkdir -p $(@D)
+_tmp/appendix.tex: $(APPENDICES) $(PANDOC_REQUIRES) | _tmp
 	@echo "Building $@ from $(APPENDICES)"
 	@$(PANDOC) -o $@ $(PANDOC_OPTIONS) $(APPENDICES)
 
-_tmp/abstract.tex: $(ABSTRACT) $(PANDOC_REQUIRES) templates/abstract.tex
-	@mkdir -p $(@D)
+_tmp/abstract.tex: $(ABSTRACT) $(PANDOC_REQUIRES) templates/abstract.tex | _tmp
 	@echo "Building $@ from $<"
 	@$(PANDOC) -o $@ $(ABSTRACT_OPTIONS) $<
 
-_tmp/pandoc.tex: $(CHAPTERS) $(SETTINGS) $(BEFORE) $(AFTER) $(PANDOC_REQUIRES) templates/pandoc.tex
-	@mkdir -p $(@D)
+_tmp/pandoc.tex: $(CHAPTERS) $(SETTINGS) $(BEFORE) $(AFTER) $(PANDOC_REQUIRES) templates/pandoc.tex | _tmp
 	@echo "Building $@ from templates/$(@F) and $(SETTINGS)"
 	@$(PANDOC) -o $@ $(LATEX_OPTIONS) $(CHAPTERS)
 	@echo "Adjusting location of sfchap in $@ to point to templates/"
@@ -263,8 +253,7 @@ _tmp/pandoc.tex: $(CHAPTERS) $(SETTINGS) $(BEFORE) $(AFTER) $(PANDOC_REQUIRES) t
 	@mv $@ $@.tmp && sed 's/\\usepackage{svg}/\\usepackage[inkscapepath=_tmp]{svg}/' < $@.tmp > $@
 	@rm $@.tmp
 
-_tmp/overleaf.tex: $(CHAPTERS) $(SETTINGS) $(PANDOC_REQUIRES) templates/overleaf.tex
-	@mkdir -p $(@D)
+_tmp/overleaf.tex: $(CHAPTERS) $(SETTINGS) $(PANDOC_REQUIRES) templates/overleaf.tex | _tmp
 	@echo "Building $@ from $(SETTINGS) and $(SETTINGS_EXTRAS)"
 	@$(PANDOC) -o $@ $(OVERLEAF_OPTIONS) $(CHAPTERS)
 	@echo "Adjusting location of sfchap in $@ to point to templates/"
