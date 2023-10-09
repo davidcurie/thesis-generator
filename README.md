@@ -39,7 +39,7 @@ automate publishing][markdown-and-makefiles].
 ## Requirements
 
 - [Make](https://www.gnu.org/software/make/)
-- [Pandoc](https://pandoc.org/index.html) version >= 3.1.7
+- [Pandoc](https://pandoc.org/index.html) version >= 3.1.8
 - [LaTeX distribution](https://www.latex-project.org)
 
 ### Required files to edit
