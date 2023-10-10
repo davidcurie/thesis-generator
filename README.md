@@ -40,7 +40,25 @@ automate publishing][markdown-and-makefiles].
 
 - [Make](https://www.gnu.org/software/make/)
 - [Pandoc](https://pandoc.org/index.html) version >= 3.1.8
-- [LaTeX distribution](https://www.latex-project.org)
+- [LaTeX distribution](https://www.latex-project.org) with pdf-engine: `xelatex`
+- Shell with access to basic bash commands: `rm`, `touch`, `mkdir`.
+    - Windows: Windows Subsystem for Linux (WSL2)
+    - MacOS: Terminal or similar
+
+> The Pandoc version supplied by Ubuntu repositories frequently lags behind the
+latest Pandoc release---sometimes by several years. If you are running WSL with
+Ubunutu 22.04 LTS, consider installing Pandoc directly from source in your
+Ubuntu environment. If you install Pandoc through Anaconda/Miniconda, opt for
+the version from the conda-forge channel.
+
+The following additional package is required if you want to make use of
+native SVG conversion in your figures:
+
+- rsvg-convert
+ 
+> rsvg-convert is included in [Inkscape][inkscape] in MacOS, and
+available as a standalone package on MacOS (`brew install librsvg`), Ubuntu
+(`apt install librsvg2-bin`), or Windows (`choco install rsvg-convert`).
 
 ### Required files to edit
 
