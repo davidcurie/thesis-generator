@@ -112,7 +112,8 @@ DOC_OPTIONS = $(PANDOC_OPTIONS)
 SIMPLIFY = --metadata=toc:false --metadata=lot:false --metadata=lof:false \
 				--metadata=title:"" --metadata=subtitle:"" --metadata=author:"" --metadata=date:"" \
 				--metadata=numbersections:false --quiet
-DRAFT = $(SIMPLIFY) -H templates/draft.sty
+DRAFT_SETTINGS = $(wildcard _tmp/*.yml _tmp/*.yaml)
+DRAFT = $(SIMPLIFY) $(foreach file, $(DRAFT_SETTINGS),--metadata-file=$(file))
 ABSTRACT_OPTIONS = $(GENERAL_OPTIONS) --template=templates/abstract.tex
 THESIS_OPTIONS = $(foreach file, $(BEFORE),-B $(file)) \
 				$(foreach file, $(AFTER),-A $(file)) \
@@ -202,8 +203,9 @@ _build/pdf/%.pdf: $(SOURCE_DIR)/%.* $(PANDOC_REQUIRES) templates/pandoc.tex | _b
 	@echo "Building $@ from $<"
 	@$(PANDOC) -o $@ $(PDF_OPTIONS) $(SIMPLIFY) $<
 
-_build/draft/%.pdf: $(SOURCE_DIR)/%.* $(PANDOC_REQUIRES) templates/pandoc.tex templates/draft.sty | _build/draft
+_build/draft/%.pdf: $(SOURCE_DIR)/%.* $(PANDOC_REQUIRES) templates/pandoc.tex templates/draft.yaml | _build/draft
 	@echo "Building $@ from $<"
+	@$(foreach file, $(SETTINGS),sed "/header-includes:/r templates/draft.yaml" $(file) > _tmp/$(notdir $(file)))
 	@$(PANDOC) -o $@ $(PDF_OPTIONS) $(DRAFT) $<
 
 _build/html/%.html: $(SOURCE_DIR)/%.* $(CSS) $(JS) $(PANDOC_REQUIRES) | _build/html
