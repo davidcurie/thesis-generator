@@ -82,7 +82,7 @@ particular, this project makes use of the following assumed metadata fields:
 ```yaml
 title: "A title"
 author: First Last
-institution: Some University
+institute: Some University
 degree: Doctor of Philosopy
 major: Major
 date: Month Day, Year
