@@ -100,7 +100,7 @@ GENERAL_OPTIONS = --metadata-file=templates/settings_default.yaml $(BIB_OPTIONS)
 REQUIRED_OPTIONS = --metadata-file=templates/settings_required.yaml
 COMMON_OPTIONS = $(GENERAL_OPTIONS) $(SETTINGS_EXTRAS) $(REQUIRED_OPTIONS)
 OVERLEAF_OPTIONS = $(COMMON_OPTIONS) --template=templates/overleaf.tex --natbib
-PANDOC_OPTIONS = $(COMMON_OPTIONS) --resource-path=$(GRAPHICS_DIR) --citeproc
+PANDOC_OPTIONS = $(COMMON_OPTIONS) --resource-path=$(GRAPHICS_DIR) -F pandoc-crossref --citeproc
 PDF_OPTIONS = $(PANDOC_OPTIONS) --pdf-engine=xelatex --template=templates/pandoc.tex
 HTML_OPTIONS = $(PANDOC_OPTIONS) \
 				--standalone \

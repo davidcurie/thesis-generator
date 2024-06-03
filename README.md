@@ -40,6 +40,7 @@ automate publishing][markdown-and-makefiles].
 
 - [Make](https://www.gnu.org/software/make/)
 - [Pandoc](https://pandoc.org/index.html) version >= 3.1.8
+- [Pandoc-crossref](https://github.com/lierdakil/pandoc-crossref)
 - [LaTeX distribution](https://www.latex-project.org) with pdf-engine: `xelatex`
 - Shell with access to basic bash commands: `rm`, `touch`, `mkdir`.
     - Windows: Windows Subsystem for Linux (WSL2)
