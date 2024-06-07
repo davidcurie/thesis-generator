@@ -2,11 +2,13 @@
 \usepackage{fancyhdr}
 \usepackage{fancyheadings}
 \usepackage{setspace}
+\usepackage{geometry}
 \renewcommand{\headrulewidth}{0pt}
 \renewcommand{\footrulewidth}{0pt}
+\textwidth=6in
 
 \pagestyle{fancy}
-\rhead{$major$}
+\rhead{\underline{$major$}}
 \cfoot{}
 
 \begin{document}
@@ -17,13 +19,15 @@
     $author-meta$\\[1.5em]
 
 \underline{Dissertation under the direction of Professor $chair.name$}
+\end{center}
 
 $body$
 
+\begin{center}
 \vfill
-\begin{tabular}{@{}p{0.5in}p{2.5in}p{0.3in}p{1in}@{}}
-    Approved: & \hrulefill & Date: & \hrulefill \\
-              & $chair.name$, $chair.title$ & & \\
+\begin{tabular}{@{}p{0.5in}p{3.25in}p{0.25in}p{1.25in}@{}}
+    Approved & \hrulefill & Date & \hrulefill \\
+             & $chair.name$, $chair.title$ & & \\
 \end{tabular}
 \end{center}
 \end{document}
