@@ -93,6 +93,7 @@ PDF_TARGETS := $(patsubst $(SOURCE_DIR)/%,_build/pdf/%.pdf,$(basename $(CHAPTERS
 DRAFT_TARGETS := $(patsubst $(SOURCE_DIR)/%,_build/draft/%.pdf,$(basename $(CHAPTERS)))
 HTML_TARGETS := $(patsubst $(SOURCE_DIR)/%,_build/html/%.html,$(basename $(CHAPTERS)))
 DOC_TARGETS := $(patsubst $(SOURCE_DIR)/%,_build/doc/%.docx,$(basename $(CHAPTERS)))
+DRAFT_SETTINGS_TARGETS := $(patsubst $(SETTINGS_DIR)/%,_tmp/%,$(SETTINGS))
 
 # Settings
 USER_OPTIONS = $(foreach file, $(SETTINGS),--metadata-file=$(file))
@@ -112,8 +113,7 @@ DOC_OPTIONS = $(PANDOC_OPTIONS)
 SIMPLIFY = --metadata=toc:false --metadata=lot:false --metadata=lof:false \
 				--metadata=title:"" --metadata=subtitle:"" --metadata=author:"" --metadata=date:"" \
 				--metadata=numbersections:false --quiet
-DRAFT_SETTINGS = $(wildcard _tmp/*.yml _tmp/*.yaml)
-DRAFT = $(SIMPLIFY) $(foreach file, $(DRAFT_SETTINGS),--metadata-file=$(file))
+DRAFT = $(SIMPLIFY) --metadata-file=_tmp/draft.yaml
 ABSTRACT_OPTIONS = $(GENERAL_OPTIONS) --template=templates/abstract.tex
 THESIS_OPTIONS = $(foreach file, $(BEFORE),-B $(file)) \
 				$(foreach file, $(AFTER),-A $(file)) \
@@ -203,9 +203,8 @@ _build/pdf/%.pdf: $(SOURCE_DIR)/%.* $(PANDOC_REQUIRES) templates/pandoc.tex | _b
 	@echo "Building $@ from $<"
 	@$(PANDOC) -o $@ $(PDF_OPTIONS) $(SIMPLIFY) $<
 
-_build/draft/%.pdf: $(SOURCE_DIR)/%.* $(PANDOC_REQUIRES) templates/pandoc.tex templates/draft.yaml | _build/draft
+_build/draft/%.pdf: $(SOURCE_DIR)/%.* $(PANDOC_REQUIRES) templates/pandoc.tex _tmp/draft.yaml | _build/draft
 	@echo "Building $@ from $<"
-	@$(foreach file, $(SETTINGS),sed "/header-includes:/r templates/draft.yaml" $(file) > _tmp/$(notdir $(file)))
 	@$(PANDOC) -o $@ $(PDF_OPTIONS) $(DRAFT) $<
 
 _build/html/%.html: $(SOURCE_DIR)/%.* $(CSS) $(JS) $(PANDOC_REQUIRES) | _build/html
@@ -217,6 +216,18 @@ _build/doc/%.docx: $(SOURCE_DIR)/%.* $(PANDOC_REQUIRES) | _build/doc
 	@$(PANDOC) -o $@ $(DOC_OPTIONS) $(SIMPLIFY) $<
 
 # Recipes to build required dependencies
+
+_tmp/%.yaml: extras/%.yaml templates/draft.yaml | _tmp
+	@echo "Building $@ from $<"
+	@sed "/header-includes:/r templates/draft.yaml" $< > $@
+
+_tmp/%.yml: extras/%.yml templates/draft.yaml | _tmp
+	@echo "Building $@ from $<"
+	@sed "/header-includes:/r templates/draft.yaml" $< > $@
+
+_tmp/draft.yaml: $(DRAFT_SETTINGS_TARGETS) | _tmp
+	@echo "Building $@ from $(DRAFT_SETTINGS_TARGETS)"
+	@cat $(DRAFT_SETTINGS_TARGETS) > $@
 
 _tmp/title.tex: $(PANDOC_REQUIRES) templates/title.tex | _tmp
 	@echo "Building $@ from settings and templates/$(@F)"
