@@ -20,3 +20,4 @@ geometry:
   - heightrounded
 linestretch: 1
 reference-section-title: References
+autoSectionLabels: True
