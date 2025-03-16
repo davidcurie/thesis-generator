@@ -89,6 +89,7 @@ THESIS_ABSTRACT := _build/pandoc/$(FILE_NAME)_abstract.pdf
 LATEX_TARGET := _build/latex/$(FILE_NAME).pdf
 LATEX_ABSTRACT := _build/latex/$(FILE_NAME)_abstract.pdf
 OVERLEAF_TARGET := _build/overleaf/$(FILE_NAME).pdf
+DOC_TARGET := _build/doc/$(FILE_NAME).docx
 PDF_TARGETS := $(patsubst $(SOURCE_DIR)/%,_build/pdf/%.pdf,$(basename $(CHAPTERS)))
 DRAFT_TARGETS := $(patsubst $(SOURCE_DIR)/%,_build/draft/%.pdf,$(basename $(CHAPTERS)))
 HTML_TARGETS := $(patsubst $(SOURCE_DIR)/%,_build/html/%.html,$(basename $(CHAPTERS)))
@@ -141,7 +142,8 @@ latex: $(LATEX_TARGET)
 overleaf: $(OVERLEAF_TARGET)
 pdf: $(PDF_TARGETS) 
 html: $(HTML_TARGETS)
-doc: $(DOC_TARGETS)
+doc: $(DOC_TARGET)
+docs: $(DOC_TARGETS)
 draft: $(DRAFT_TARGETS) 
 
 clean:
@@ -190,6 +192,10 @@ $(OVERLEAF_TARGET): _tmp/overleaf.tex $(BEFORE) $(AFTER) | _build/overleaf
 	@pdflatex -interaction=nonstopmode --shell-escape --output-directory=_tmp $< &> /dev/null
 	@pdflatex -interaction=nonstopmode --shell-escape --output-directory=_tmp $< &> /dev/null
 	mv _tmp/overleaf.pdf $@
+
+$(DOC_TARGET): $(CHAPTERS) $(BEFORE) $(AFTER) $(THESIS_REQUIRES) | _build/doc
+	@echo "Building $@ from $(CHAPTERS)"
+	@$(PANDOC) -o $@ $(DOC_OPTIONS) $(CHAPTERS)
 
 # Recipes to build single files
 

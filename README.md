@@ -345,6 +345,12 @@ make html
 Make a Word document of each chapter:
 
 ```bash
+make docs
+```
+
+Make a composite Word document of all assembled chapters:
+
+```bash
 make doc
 ```
 
@@ -548,7 +554,8 @@ LaTeX suite, the following checklist may be helpful:
 | `thesis`   | `chapters/*`, `extras/*` | `pandoc/thesis.pdf`, `pandoc/thesis_abstract.pdf` | pandoc   |
 | `pdf`      | `chapters/*`             | `pdf/*.pdf`,                                      | pandoc   |
 | `html`     | `chapters/*`             | `html/*.html`,                                    | pandoc   |
-| `doc`      | `chapters/*`             | `doc/*.docx`,                                     | pandoc   |
+| `doc`      | `chapters/*`             | `doc/thesis.docx`,                                | pandoc   |
+| `docs`     | `chapters/*`             | `doc/*.docx`,                                     | pandoc   |
 | `draft`    | `chapters/*`             | `draft/*.pdf`,                                    | pandoc   |
 | `latex`    | `_tmp/pandoc.tex`,       | `latex/thesis.pdf`                                | pdflatex |
 | `abstract` | `_tmp/abstract.tex`      | `latex/thesis_abstract.pdf`                       | pdflatex |
