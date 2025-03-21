@@ -86,6 +86,7 @@ endif
 # Files we can build on demand
 THESIS_TARGET := _build/pandoc/$(FILE_NAME).pdf
 THESIS_ABSTRACT := _build/pandoc/$(FILE_NAME)_abstract.pdf
+THESIS_TITLE := _build/pandoc/title_signatures.pdf
 LATEX_TARGET := _build/latex/$(FILE_NAME).pdf
 LATEX_ABSTRACT := _build/latex/$(FILE_NAME)_abstract.pdf
 OVERLEAF_TARGET := _build/overleaf/$(FILE_NAME).pdf
@@ -131,12 +132,16 @@ PANDOC_REQUIRES = $(TEMPLATE_DIR)/settings_default.yaml \
 THESIS_REQUIRES = $(PANDOC_REQUIRES) \
 				$(TEMPLATE_DIR)/sfchap.sty \
 				$(TEMPLATE_DIR)/sfsection.sty
+TITLE_OPTIONS = $(COMMON_OPTIONS) $(SIMPLIFY) \
+				--metadata=classoption:oneside \
+				--pdf-engine=xelatex
 
 all: clean thesis pdf html doc
 
 # TARGETS get expanded to a list of files; any file that doesn't yet
 # exist in this list gets built according to the recipe for the target
-thesis: $(THESIS_TARGET) $(THESIS_ABSTRACT)
+thesis: $(THESIS_TARGET) $(THESIS_ABSTRACT) $(THESIS_TITLE)
+title: $(THESIS_TITLE)
 abstract: $(LATEX_ABSTRACT)
 latex: $(LATEX_TARGET)
 overleaf: $(OVERLEAF_TARGET)
@@ -165,6 +170,10 @@ $(THESIS_TARGET): $(CHAPTERS) $(BEFORE) $(AFTER) $(THESIS_REQUIRES) | _build/pan
 $(THESIS_ABSTRACT): $(ABSTRACT) $(PANDOC_REQUIRES) templates/abstract.tex | _build/pandoc
 	@echo "Building $@ from $<"
 	@$(PANDOC) -o $@ $(ABSTRACT_OPTIONS) $<
+
+$(THESIS_TITLE): _tmp/title_signatures.tex $(PANDOC_REQUIRES) | _build/pandoc
+	@echo "Building $@ from settings and $<"
+	@$(PANDOC) -o $@ $(TITLE_OPTIONS) -B $< /dev/null
 
 # Recipes for explicit builds
 
@@ -238,6 +247,10 @@ _tmp/draft.yaml: $(DRAFT_SETTINGS_TARGETS) | _tmp
 _tmp/title.tex: $(PANDOC_REQUIRES) templates/title.tex | _tmp
 	@echo "Building $@ from settings and templates/$(@F)"
 	@$(PANDOC) -o $@ -f markdown --template=templates/$(@F) $(PANDOC_OPTIONS) /dev/null
+
+_tmp/title_signatures.tex: $(PANDOC_REQUIRES) templates/title_signatures.tex | _tmp
+	@echo "Building $@ from settings and templates/$(@F)"
+	@$(PANDOC) -o $@ -f markdown -s --template=templates/title_signatures.tex $(COMMON_OPTIONS) /dev/null
 
 _tmp/copyright.tex: $(COPYRIGHT) $(PANDOC_REQUIRES) templates/copyright.tex | _tmp
 	@echo "Building $@ from $<"

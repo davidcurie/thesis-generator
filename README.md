@@ -306,14 +306,14 @@ where `<target>` is replaced by several options below.
 
 Generate a fully compiled thesis (title, optional front matter if present, main
 content, bibliography, optional appendix if present) and a separate abstract
-page formatted for submission to print.
+and title page formatted for submission to print.
 
 ```bash
 make thesis
 ```
 
-The results are stored under `_build/pandoc/thesis.pdf` and
-`_build/pandoc/thesis_abstract.pdf`.
+The results are stored under `_build/pandoc/thesis.pdf`,
+`_build/pandoc/thesis_abstract.pdf`, and `_build/pandoc/title_signatures.pdf`.
 
 ### Generate review documents
 
@@ -552,6 +552,7 @@ LaTeX suite, the following checklist may be helpful:
 | Target     | Rebuilt on changes to    | Result in `_build/`                               | Engine   |
 |------------|--------------------------|---------------------------------------------------|----------|
 | `thesis`   | `chapters/*`, `extras/*` | `pandoc/thesis.pdf`, `pandoc/thesis_abstract.pdf` | pandoc   |
+| `title`    | `extras/*.yaml`          | `pandoc/title_signatures.pdf`                     | pandoc   |
 | `pdf`      | `chapters/*`             | `pdf/*.pdf`,                                      | pandoc   |
 | `html`     | `chapters/*`             | `html/*.html`,                                    | pandoc   |
 | `doc`      | `chapters/*`             | `doc/thesis.docx`,                                | pandoc   |
